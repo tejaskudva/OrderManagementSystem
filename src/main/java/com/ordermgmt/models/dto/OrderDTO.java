@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDTO {
+public class OrderDTO extends GenericApiResponse {
 
 	private String customerName;
 	private String status; // e.g., NEW, PROCESSING, COMPLETED, FAILED

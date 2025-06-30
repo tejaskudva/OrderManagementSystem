@@ -9,4 +9,8 @@ public interface OrderService {
 
 	void createOrder(List<OrderDTO> orders) throws ExecutionException, InterruptedException;
 
+	OrderDTO getOrderById(Long orderId);
+
+	List<OrderDTO> getOrderByCustomerName(String customerName);
+
 }

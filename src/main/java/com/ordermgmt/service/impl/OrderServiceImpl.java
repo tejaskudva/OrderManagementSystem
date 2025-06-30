@@ -25,7 +25,7 @@ import com.ordermgmt.service.OrderService;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
 	private final OrderRepository orderRepo;
@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
 
 		ResponseEntity<String> response = restTemplate.exchange("http://localhost:8080/test/pushOrderNotif",
 				HttpMethod.POST, new HttpEntity<>(new HttpHeaders()), String.class);
-		
+
 		logger.info("API response: " + response);
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
@@ -82,6 +82,21 @@ public class OrderServiceImpl implements OrderService {
 		}
 
 		orderRepo.updateOrderStatus(orderId, "COMPLETED");
+	}
+
+	@Override
+	public OrderDTO getOrderById(Long orderId) {
+
+		return orderMapper.toDto(orderRepo.findById(orderId).orElseThrow());
+
+	}
+
+	@Override
+	public List<OrderDTO> getOrderByCustomerName(String customerName) {
+
+		List<Order> orders = orderRepo.findByCustomerName(customerName);
+
+		return orders.stream().map(orderMapper::toDto).collect(Collectors.toList());
 	}
 
 }
