@@ -78,8 +78,8 @@ public class OrderController {
 	}
 
 	@GetMapping("/test")
-	public String test(){
-		
+	public String test() {
+
 		List<Map<String, Object>> output = jdbc.queryForList("select api_request from api_logs");
 		System.out.println(output);
 		return "Hello";

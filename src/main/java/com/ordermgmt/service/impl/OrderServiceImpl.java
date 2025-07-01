@@ -9,14 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
+import com.ordermgmt.helpers.RestTemplateWrapper;
 import com.ordermgmt.mapstructs.OrderMapper;
+import com.ordermgmt.models.dto.ExternalServiceWrapperResponse;
 import com.ordermgmt.models.dto.OrderDTO;
 import com.ordermgmt.models.entity.Order;
 import com.ordermgmt.rabbitmq.producers.OrderEventProducer;
@@ -34,18 +30,18 @@ public class OrderServiceImpl implements OrderService {
 	private final TaskExecutor taskExecutor;
 
 	private final OrderEventProducer orderEventProducer;
-	private final RestTemplate restTemplate;
+	private final RestTemplateWrapper apiWrapper;
 
 	@Value("${order.batchsize}")
 	private int batchSize;
 
 	OrderServiceImpl(OrderRepository orderRepo, OrderMapper orderMapper, TaskExecutor taskExecutor,
-			OrderEventProducer orderEventProducer, RestTemplate restTemplate) {
+			OrderEventProducer orderEventProducer, RestTemplateWrapper apiWrapper) {
 		this.orderRepo = orderRepo;
 		this.orderMapper = orderMapper;
 		this.taskExecutor = taskExecutor;
 		this.orderEventProducer = orderEventProducer;
-		this.restTemplate = restTemplate;
+		this.apiWrapper = apiWrapper;
 	}
 
 	@Override
@@ -72,12 +68,12 @@ public class OrderServiceImpl implements OrderService {
 
 	public void completeOrder(Long orderId) throws Exception {
 
-		ResponseEntity<String> response = restTemplate.exchange("http://localhost:8080/test/pushOrderNotif",
-				HttpMethod.POST, new HttpEntity<>(new HttpHeaders()), String.class);
+		ExternalServiceWrapperResponse response = apiWrapper.externalServiceWrapper("userinfo", null,
+				String.valueOf(orderId), null);
 
 		logger.info("API response: " + response);
 
-		if (!response.getStatusCode().is2xxSuccessful()) {
+		if (!response.getHttpCode().is2xxSuccessful()) {
 			throw new Exception("API Failure");
 		}
 
